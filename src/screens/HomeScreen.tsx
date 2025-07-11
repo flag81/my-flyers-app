@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, FlatList, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { View, Text, TextInput, Button, TouchableOpacity, FlatList, Image, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProducts, getStores } from '../services/api';
 import ProductModal from '../components/ProductModal';
@@ -35,7 +35,7 @@ const HomeScreen = () => {
   const [modalProduct, setModalProduct] = useState<any>({});
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-
+  const [refreshing, setRefreshing] = useState(false);
 
 
 
@@ -64,6 +64,21 @@ const HomeScreen = () => {
     initialPageParam: 1,
     enabled: true
   });
+
+
+    const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Reset all filters
+    setSelectedStore(null);
+    setSelectedStoreName('');
+    setIsFavorite(false);
+    setOnSale(false);
+    setSearchKeyword('');
+    // Invalidate and refetch the data
+    queryClient.invalidateQueries({ queryKey: ['products'] }).then(() => {
+      setRefreshing(false);
+    });
+  }, [queryClient]);
 
   // Fetch stores
   useEffect(() => {
@@ -162,7 +177,7 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Flyers App 🚀</Text>
+
 
       {/* Search */}
       <View style={styles.row}>
@@ -173,26 +188,46 @@ const HomeScreen = () => {
           onChangeText={setSearchKeyword}
           onSubmitEditing={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })}
         />
-        <Button title="Search" onPress={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })} />
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })}
+        >
+          <Text>Search</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Filters */}
+
+
+
+
+     { /*
       <View style={styles.row}>
-        <Button
-          title={isFavorite ? 'Favorites ✅' : 'Favorites'}
+        <TouchableOpacity
+          style={[styles.filterButton, isFavorite && styles.filterButtonSelected]}
           onPress={() => setIsFavorite((prev) => !prev)}
-        />
-        <Button
-          title={onSale ? 'On Sale ✅' : 'On Sale'}
+        >
+          <Text>{isFavorite ? 'Favorites ✅' : 'Favorites'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterButton, onSale && styles.filterButtonSelected]}
           onPress={() => setOnSale((prev) => !prev)}
-        />
+        >
+          <Text>{onSale ? 'On Sale ✅' : 'On Sale'}</Text>
+        </TouchableOpacity>
       </View>
+
+      */}
+
+
+
 
       {/* Store filter */}
       <FlatList
         data={stores}
         horizontal
         keyExtractor={(item) => item.storeId.toString()}
+
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[
@@ -200,8 +235,13 @@ const HomeScreen = () => {
               selectedStore === item.storeId && styles.storeButtonSelected
             ]}
             onPress={() => {
-              setSelectedStore(item.storeId);
-              setSelectedStoreName(item.storeName);
+              if (selectedStore === item.storeId) {
+                setSelectedStore(null);
+                setSelectedStoreName('');
+              } else {
+                setSelectedStore(item.storeId);
+                setSelectedStoreName(item.storeName);
+              }
             }}
           >
             <Text>{item.storeName}</Text>
@@ -209,6 +249,8 @@ const HomeScreen = () => {
         )}
         style={styles.storeList}
       />
+
+
 
       {/* Active filters */}
       <View style={styles.filtersRow}>
@@ -222,6 +264,9 @@ const HomeScreen = () => {
 <FlatList
   data={combinedProducts}
   keyExtractor={(item) => item.productId.toString()}
+            refreshControl={
+    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+  }
   renderItem={({ item, index }) => {
     const showSectionTitle =
       index === 0 || item.section !== combinedProducts[index - 1].section;
@@ -306,6 +351,18 @@ const styles = StyleSheet.create({
   storeButtonSelected: {
     backgroundColor: '#cceeff'
   },
+    filterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#eee',
+    borderRadius: 4,
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+    filterButtonSelected: {
+    backgroundColor: '#cceeff',
+  },
   filtersRow: {
     flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12, width: '100%'
   },
@@ -333,7 +390,17 @@ const styles = StyleSheet.create({
   },
   productPrice: {
     fontSize: 14
-  }
+  },
+
+    searchButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#eee',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 40,
+  },
 });
 
 export default HomeScreen;
