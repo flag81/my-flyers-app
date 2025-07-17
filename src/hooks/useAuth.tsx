@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
+
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -73,4 +74,24 @@ export const useAuth = () => {
     setEmail,
     checkUserSession
   };
+};
+
+
+
+// Create the context to hold the auth state
+const AuthContext = createContext<ReturnType<typeof useAuth> | null>(null);
+
+// Create the provider component that will wrap your app
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const auth = useAuth();
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+};
+
+// Create a custom hook to easily access the auth context
+export const useAuthContext = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuthContext must be used within an AuthProvider');
+  }
+  return context;
 };
