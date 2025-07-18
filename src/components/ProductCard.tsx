@@ -16,7 +16,11 @@ type Props = {
   handleToggleFavorite: (productId: number, productIsCurrentlyFavorite: boolean) => void;
 };
 
+
 const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite }) => {
+
+  console.log('ProductCard item:', item);
+
   const [imageHeight, setImageHeight] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [zoomVisible, setZoomVisible] = useState(false);
@@ -51,29 +55,27 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
   }, [item.image_url]);
 
   return (
-    <View style={[
-      styles.productCard,
-      imageHeight !== null ? { height: imageHeight + 110 } : {}
-    ]}>
-      {loading ? (
-            <View style={[
-      styles.productCard,
-      imageHeight !== null ? { height: imageHeight + 110 } : {}
-    ]}>
-          <ActivityIndicator size="large" color="#999" />
-        </View>
-      ) : (
-        <TouchableOpacity
-          style={{ width: '100%', height: imageHeight! }}
-          onPress={() => setZoomVisible(true)}
-        >
-          <Image
-            source={{ uri: imageUrl }}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-      )}
+    <View style={
+      styles.productCard}>
+
+
+
+    {loading ? (
+      <View style={styles.imageSkeleton}>
+        <ActivityIndicator size="large" color="#999" />
+      </View>
+    ) : (
+      <TouchableOpacity
+        style={{ width: '100%', height: imageHeight! }}
+        onPress={() => setZoomVisible(true)}
+      >
+        <Image
+          source={{ uri: imageUrl }}
+          style={{ width: '100%', height: '100%' }}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
+    )}
 
       <View style={styles.infoContainer}>
         <Text style={styles.productDescription}>{item.product_description}</Text>
@@ -81,6 +83,20 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
           {item.old_price > 0 ? `${item.old_price}€ → ` : ''}
           <Text style={{ color: 'green' }}>{item.new_price}€</Text>
         </Text>
+
+
+        <Text style={{ fontSize: 12, color: '#666' }}>
+          Dyqani: {item.storeName || 'U'}
+        </Text>
+
+        {item.sale_end_date && (
+          <Text style={{ fontSize: 12, color: '#666' }}>
+            Oferta deri: {new Date(item.sale_end_date).toLocaleDateString()}
+          </Text>
+        )}
+
+        {/* ⭐ Favorite Button */}
+
 
         <TouchableOpacity
           onPress={() => handleToggleFavorite(item.productId, item.isFavorite)}
