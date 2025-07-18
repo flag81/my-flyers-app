@@ -4,8 +4,10 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
+import CustomHeaderComponent from '../components/CustomHeaderComponent';
 
-const Drawer = createDrawerNavigator();
+
+const Drawer = createDrawerNavigator(); 
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
@@ -35,12 +37,24 @@ export default function AppNavigator() {
         <Drawer.Screen name="Main" component={MainTabs} 
         
             options={{
-            headerTitle: 'Meniven',
-            headerShown: true, // Show or hide header
+            //headerTitle: 'Meniven',
+           // headerShown: true, // Show or hide header
+            header: () => <CustomHeaderComponent title="Meniven.com" />
             // You can also use header: () => <CustomHeaderComponent />
           }}
         
         />
+
+        <Drawer.Screen name="Favorites" component={FavoritesScreen} 
+
+                    options={{
+            //headerTitle: 'Meniven',
+           // headerShown: true, // Show or hide header
+            header: () => <CustomHeaderComponent title="Meniven.com" />
+            // You can also use header: () => <CustomHeaderComponent />
+          }}
+        />
+
 
         {/* Add more drawer items here */}
       </Drawer.Navigator>

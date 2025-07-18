@@ -164,18 +164,23 @@ const HomeScreen = () => {
 
     <SafeAreaView style={styles.container}>
    
-      <Text style={styles.title}>Flyers App 🚀</Text>
+
 
       {/* Search */}
       <View style={styles.row}>
         <TextInput
-          placeholder="Search products"
+          placeholder="Kerko produkte..."
           style={styles.input}
           value={searchKeyword}
           onChangeText={setSearchKeyword}
           onSubmitEditing={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })}
         />
-        <Button title="Search" onPress={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })} />
+
+        <TouchableOpacity  style={styles.storeButton}
+        
+        onPress={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })}>
+          <Text style={{ color: 'black' }}>Kerko</Text>
+        </TouchableOpacity>
       </View>
 
 
@@ -192,10 +197,19 @@ const HomeScreen = () => {
               selectedStore === item.storeId && styles.storeButtonSelected
             ]}
             onPress={() => {
-              setSelectedStore(item.storeId);
-              setSelectedStoreName(item.storeName);
+              if (selectedStore === item.storeId) {
+                // If the same store is clicked again, reset the filter
+                setSelectedStore(null);
+                setSelectedStoreName('');
+              } else {
+                // Otherwise, set the new store filter
+                setSelectedStore(item.storeId);
+                setSelectedStoreName(item.storeName);
+              }
             }}
-          >
+            >
+              
+          
             <Text>{item.storeName}</Text>
           </TouchableOpacity>
         )}
