@@ -7,10 +7,24 @@ import FlyerSlider from '../components/FlyerSlider';
 import RegistrationModal from '../components/RegistrationModal';
 import ProductCard from '../components/ProductCard';
 import { useAuth } from '../hooks/useAuth';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 
 
+// Define the type for the navigator's screen list
+type RootTabParamList = {
+  Home: { isFavorites?: boolean };
+  Favorites: { isFavorites?: boolean };
+  OnSale: { isFavorites?: boolean };
+};
 
-const HomeScreen = () => {
+// Use BottomTabScreenProps for type safety
+type Props = BottomTabScreenProps<RootTabParamList, 'Home' | 'Favorites' | 'OnSale'>;
+
+
+const HomeScreen: React.FC<Props> = ({ route }: Props) => {
+
+    const isFavoritesFromParams = route.params?.isFavorites ?? false;
+  // 
   // Auth hook
   const {
     userId,
@@ -208,7 +222,7 @@ const HomeScreen = () => {
               }
             }}
             >
-              
+
           
             <Text>{item.storeName}</Text>
           </TouchableOpacity>
@@ -236,7 +250,7 @@ const HomeScreen = () => {
       <View>
         {showSectionTitle && (
           <Text style={styles.sectionTitle}>
-            {item.section === 'On Sale' ? '🔥 On Sale' : 'Expired ❌'}
+            {item.section === 'On Sale' ? '' : 'Skaduar'}
           </Text>
         )}
         <ProductCard

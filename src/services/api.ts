@@ -1,3 +1,6 @@
+// filepath: src/services/api.ts
+import apiService from './apiService'; // Import the new service
+
 // TODO: Implement API calls
 // src/services/api.ts
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -5,21 +8,17 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL;
 export const getProducts = async ({ pageParam = 1, queryKey }: any) => {
   const [, userId, storeId, isFavorite, onSale, keyword] = queryKey;
 
-  const url = new URL(`${API_URL}/getProducts`);
-  url.searchParams.append('page', pageParam);
-  if (userId) url.searchParams.append('userId', userId.toString());
-  if (storeId) url.searchParams.append('storeId', storeId.toString());
-  if (isFavorite) url.searchParams.append('isFavorite', 'true');
-  if (onSale) url.searchParams.append('onSale', 'true');
-  if (keyword) url.searchParams.append('keyword', keyword);
+  const params = new URLSearchParams({ page: pageParam });
+  if (userId) params.append('userId', userId.toString());
+  if (storeId) params.append('storeId', storeId.toString());
+  if (isFavorite) params.append('isFavorite', 'true');
+  if (onSale) params.append('onSale', 'true');
+  if (keyword) params.append('keyword', keyword);
 
-  const res = await fetch(url.toString(), {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include'
-  });
+  // Use the pre-configured axios instance
+  const res = await apiService.get('/getProducts', { params });
 
-  const json = await res.json();
+  const json = res.data;
   return {
     products: json.data ?? [],
     nextPage: json.nextPage
@@ -27,9 +26,7 @@ export const getProducts = async ({ pageParam = 1, queryKey }: any) => {
 };
 
 export const getStores = async () => {
-  const res = await fetch(`${API_URL}/getStores`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  });
-  return await res.json();
+  // Use the pre-configured axios instance
+  const res = await apiService.get('/getStores');
+  return res.data;
 };

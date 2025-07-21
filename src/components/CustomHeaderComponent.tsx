@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { DrawerActions } from '@react-navigation/native';
@@ -18,8 +18,20 @@ const CustomHeaderComponent: React.FC<CustomHeaderProps> = ({ title }) => {
         <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())} style={styles.icon}>
           <Ionicons name="menu" size={28} color="black" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{title}</Text>
+
+   <Image
+         source={require('../assets/logo.png')}
+         style={styles.logo}
+       />
+
+
+
+
+
       </View>
+
+
+
     </SafeAreaView>
   );
 };
@@ -43,6 +55,11 @@ const styles = StyleSheet.create({
   },
   icon: {
     padding: 5,
+  },
+    logo: {
+    height: 50,
+    width: 120,
+    resizeMode: 'contain',
   }
 });
 

@@ -18,15 +18,24 @@ function MainTabs() {
         component={HomeScreen}
         options={{ headerShown: false }}
       />
+
       <Tab.Screen
         name="Favorites"
-        component={FavoritesScreen}
+        component={HomeScreen}
+        initialParams={{ isFavorites: true }}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="OnSale"
+        component={HomeScreen}
+        initialParams={{ onSale: true }}
         options={{ headerShown: false }}
       />
       {/* Add more tabs here */}
     </Tab.Navigator>
   );
 }
+
 
 
 
