@@ -15,7 +15,7 @@ const AppNavigator = () => {
       }}
     >
       <Tab.Screen 
-        name="Home" 
+        name="Fillimi" 
         component={HomeScreen} 
         // options={{
         //   tabBarIcon: ({ color, size }) => (
@@ -24,7 +24,7 @@ const AppNavigator = () => {
         // }}
       />
       <Tab.Screen 
-        name="Favorites" 
+        name="Favoritet" 
         component={FavoritesScreen} 
         // options={{
         //   tabBarIcon: ({ color, size }) => (

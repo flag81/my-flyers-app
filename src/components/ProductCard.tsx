@@ -91,7 +91,13 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
 
         {item.sale_end_date && (
           <Text style={{ fontSize: 12, color: '#666' }}>
-            Oferta deri: {new Date(item.sale_end_date).toLocaleDateString()}
+            {/* Sale End Date in format DD/MM/YYYY */}
+            Oferta deri: {new Date(item.sale_end_date).toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })}
+
           </Text>
         )}
 
@@ -103,7 +109,7 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
           style={styles.favoriteButton}
         >
           <Text style={{ color: item.isFavorite ? 'gold' : 'gray' }}>
-            {item.isFavorite ? '★ Remove Favorite' : '☆ Add to Favorites'}
+            {item.isFavorite ? '★ Largo nga Favoritet' : '☆ Shto Favorit'}
           </Text>
         </TouchableOpacity>
       </View>

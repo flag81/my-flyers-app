@@ -14,19 +14,19 @@ function MainTabs() {
   return (
     <Tab.Navigator>
       <Tab.Screen
-        name="Home"
+        name="Fillimi"
         component={HomeScreen}
         options={{ headerShown: false }}
       />
 
       <Tab.Screen
-        name="Favorites"
+        name="Favoritet"
         component={HomeScreen}
         initialParams={{ isFavorites: true }}
         options={{ headerShown: false }}
       />
       <Tab.Screen
-        name="OnSale"
+        name="Ne zbritje"
         component={HomeScreen}
         initialParams={{ onSale: true }}
         options={{ headerShown: false }}

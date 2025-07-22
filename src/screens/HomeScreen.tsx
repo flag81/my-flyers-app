@@ -7,12 +7,13 @@ import FlyerSlider from '../components/FlyerSlider';
 import RegistrationModal from '../components/RegistrationModal';
 import ProductCard from '../components/ProductCard';
 import { useAuth } from '../hooks/useAuth';
+import apiService from '../services/apiService';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 
 
 // Define the type for the navigator's screen list
 type RootTabParamList = {
-  Home: { isFavorites?: boolean };
+  Home: {  isFavorites?: boolean; onSale?: boolean};
   Favorites: { isFavorites?: boolean };
   OnSale: { isFavorites?: boolean };
 };
@@ -23,25 +24,23 @@ type Props = BottomTabScreenProps<RootTabParamList, 'Home' | 'Favorites' | 'OnSa
 
 const HomeScreen: React.FC<Props> = ({ route }: Props) => {
 
-    const isFavoritesFromParams = route.params?.isFavorites ?? false;
+    const { isFavorites: routeIsFavorites, onSale: routeOnSale } = route.params || {};
   // 
   // Auth hook
   const {
     userId,
-    isLoggedIn,
-    email,
-    setUserId,
+    checkUserSession,
+        setUserId,
     setIsLoggedIn,
-    setEmail,
-    checkUserSession
+    setEmail
   } = useAuth();
 
   // State
   const [stores, setStores] = useState<any[]>([]);
   const [selectedStore, setSelectedStore] = useState<number | null>(null);
   const [selectedStoreName, setSelectedStoreName] = useState<string>('');
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [onSale, setOnSale] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(routeIsFavorites || false);
+  const [onSale, setOnSale] = useState(routeOnSale || false);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState('');
@@ -50,7 +49,11 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
-
+  // Add this useEffect to sync state with route params
+  useEffect(() => {
+    setIsFavorite(route.params?.isFavorites || false);
+    setOnSale(route.params?.onSale || false);
+  }, [route.params]);
 
 
   const queryClient = useQueryClient();
@@ -101,18 +104,21 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
   // Toggle favorite mutation
   const toggleFavMutation = useMutation({
     mutationFn: async ({ productId, productIsCurrentlyFavorite }: { productId: number; productIsCurrentlyFavorite: boolean }) => {
-      const url = productIsCurrentlyFavorite ? '/removeFavorite' : '/addFavorite';
-      const method = productIsCurrentlyFavorite ? 'DELETE' : 'POST';
+      console.log('Toggling favorite for product:', productId, 'Current state:', productIsCurrentlyFavorite);
 
-      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}${url}`, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ userId, productId })
-      });
-
-      if (!res.ok) throw new Error('Network error');
-      return res.json();
+      if (productIsCurrentlyFavorite) {
+        // Use the pre-configured axios instance which includes the token
+        const res = await apiService.delete('/removeFavorite', {
+          data: { productId } // Pass productId in the request body for DELETE
+        });
+        return res.data;
+      } else {
+        // Use the pre-configured axios instance which includes the token
+        const res = await apiService.post('/addFavorite', {
+          productId // Pass productId in the request body for POST
+        });
+        return res.data;
+      }
     },
     onMutate: async ({ productId, productIsCurrentlyFavorite }) => {
       await queryClient.cancelQueries({ queryKey: productsQueryKey });
