@@ -9,6 +9,8 @@ import ProductCard from '../components/ProductCard';
 import { useAuth } from '../hooks/useAuth';
 import apiService from '../services/apiService';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+
 
 
 // Define the type for the navigator's screen list
@@ -96,8 +98,8 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
     const filters: string[] = [];
     if (isFavorite) filters.push('Favorites');
     if (onSale) filters.push('On Sale');
-    if (selectedStore && selectedStoreName) filters.push(`Store: ${selectedStoreName}`);
-    if (searchKeyword.length > 2) filters.push(`Keyword: "${searchKeyword}"`);
+    if (selectedStore && selectedStoreName) filters.push(`Dyqani: ${selectedStoreName}`);
+    if (searchKeyword.length > 2) filters.push(`Fjalë kyçe: "${searchKeyword}"`);
     setActiveFilters(filters);
   }, [isFavorite, onSale, selectedStore, selectedStoreName, searchKeyword]);
 
@@ -188,13 +190,20 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
 
       {/* Search */}
       <View style={styles.row}>
-        <TextInput
-          placeholder="Kerko produkte..."
-          style={styles.input}
-          value={searchKeyword}
-          onChangeText={setSearchKeyword}
-          onSubmitEditing={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })}
-        />
+        <View style={styles.searchContainer}>
+          <TextInput
+            placeholder="Kerko produkte..."
+            style={styles.input}
+            value={searchKeyword}
+            onChangeText={setSearchKeyword}
+            onSubmitEditing={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })}
+          />
+          
+            <TouchableOpacity onPress={() => setSearchKeyword('')} style={styles.clearButton}>
+              <Ionicons name="close-circle" size={22} color="#888" />
+            </TouchableOpacity>
+          
+        </View>
 
         <TouchableOpacity  style={styles.storeButton}
         
@@ -309,6 +318,18 @@ const styles = StyleSheet.create({
     paddingLeft: 16, // Add left padding if needed
     backgroundColor: '#fff'
   },
+    searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    marginRight: 8,
+  },
+    clearButton: {
+    paddingRight: 8,
+  },
   title: {
     fontSize: 24, fontWeight: 'bold', marginBottom: 16
   },
@@ -327,13 +348,17 @@ const styles = StyleSheet.create({
   storeButton: {
      paddingHorizontal: 12,
   paddingVertical: 8, // ✅ ensures vertical space for text
-  backgroundColor: '#eee',
+
   marginHorizontal: 4,
-  borderRadius: 4,
+  borderRadius: 5,
   justifyContent: 'center', // ✅ vertically center text
   alignItems: 'center',
     minHeight: 40 ,
     maxHeight: 40,
+  // add border color 
+  borderWidth: 1,
+  borderColor: '#ccc',
+
   },
   storeButtonSelected: {
     backgroundColor: '#cceeff'

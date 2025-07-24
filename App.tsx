@@ -7,7 +7,8 @@ import { AuthProvider } from './src/hooks/useAuth';
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { initializeAnonymousSession } from './src/services/apiService';
-
+import { useFonts } from 'expo-font';
+import { Ionicons } from '@expo/vector-icons';
 
 
 const queryClient = new QueryClient();
@@ -16,7 +17,10 @@ export default function App() {
 
   const [isInitialized, setIsInitialized] = useState(false);
 
-
+  // Load the fonts required by the app
+  const [fontsLoaded] = useFonts({
+    ...Ionicons.font,
+  });
   
   useEffect(() => {
     // This function runs once when the app starts.
@@ -38,7 +42,7 @@ export default function App() {
   }, []);
 
   // While we wait for the token, show a loading screen.
-  if (!isInitialized) {
+  if (!isInitialized || !fontsLoaded) {
     return (
       <View >
         <ActivityIndicator size="large" color="#0000ff" />

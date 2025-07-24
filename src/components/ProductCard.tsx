@@ -16,14 +16,29 @@ type Props = {
   handleToggleFavorite: (productId: number, productIsCurrentlyFavorite: boolean) => void;
 };
 
+// Map store logo filenames from the database to local assets
+const storeLogos: { [key: string]: any } = {
+  'spar.png': require('../../assets/spar.png'),
+  'vivafresh.jpeg': require('../../assets/vivafresh.jpeg'),
+  'interex.png': require('../../assets/interex.png'),
+  // Add other store logos here as needed
+};
+
 
 const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite }) => {
 
-  console.log('ProductCard item:', item);
+  //console.log('ProductCard item:', item);
 
   const [imageHeight, setImageHeight] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [zoomVisible, setZoomVisible] = useState(false);
+
+
+
+  
+
+
+ const cardWidth = Dimensions.get('window').width - 32;
 
   const imageUrl = item.image_url.startsWith('http')
     ? item.image_url
@@ -61,7 +76,7 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
 
 
     {loading ? (
-      <View style={styles.imageSkeleton}>
+      <View style={[styles.imageSkeleton, { height: cardWidth }]}>
         <ActivityIndicator size="large" color="#999" />
       </View>
     ) : (
@@ -81,7 +96,7 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
         <Text style={styles.productDescription}>{item.product_description}</Text>
         <Text style={styles.productPrice}>
           {item.old_price > 0 ? `${item.old_price}€ → ` : ''}
-          <Text style={{ color: 'green' }}>{item.new_price}€</Text>
+          <Text style={{ color: 'green' }}>{item.new_price > 0 ? `${item.new_price}€ ` : ''}</Text>
         </Text>
 
 
