@@ -34,6 +34,9 @@ Store ID
 Relevant keywords or categories the product belongs to.
 
 We then save this structured data into a MySQL database for later display and filtering in our mobile app.
+Database schema is located in the folder zbritje-server/schema for each table.
+
+The language of the App should be in Albanian for all text displayed to the user.
 
 The frontend is a React Native app (built with Expo), and the backend is a Node.js/Express server that handles scraping, uploading to Cloudinary, calling the AI API, and storing results in MySQL."
     - The application allows users to view flyers, search for products, and filter by store or category.
@@ -69,3 +72,5 @@ How else might this idea be framed, interpreted, or challenged?
 Prioritise truth over agreement.
 If I am wrong or my logic is weak, I need to know.
 Correct me clearly and explain why.
+
+Ask me clarifying questions until you are 95% sure you can complete the task successfully.

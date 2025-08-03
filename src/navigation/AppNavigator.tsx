@@ -4,6 +4,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
+import SettingsScreen from '../screens/SettingsScreen'; // Import the new screen
 import CustomHeaderComponent from '../components/CustomHeaderComponent';
 import { Ionicons } from '@expo/vector-icons'; // Import from @expo/vector-icons
 
@@ -17,12 +18,15 @@ export type TabParamList = {
   Fillimi: undefined;
   Favoritet: { isFavorites: boolean };
   'Ne zbritje': { onSale: boolean };
+  // NEW: Add Konfigurimi to the TabParamList
+  Konfigurimi: undefined;
 };
 
 // Define the parameters for the drawer navigator.
 export type DrawerParamList = {
-  Main: undefined;
-  Favorites: undefined;
+  // UPDATED: Changed to reflect the actual screen names in the drawer.
+  Home: undefined;
+  Konfigurimi: undefined;
 };
 
 
@@ -36,6 +40,7 @@ function MainTabs() {
         screenOptions={({
           route,
         }: {
+          // UPDATED: Include Konfigurimi in the route name type
           route: { name: keyof TabParamList };
         }) => ({
         // This function determines which icon to show for each tab
@@ -50,6 +55,9 @@ function MainTabs() {
             iconName = focused ? 'heart' : 'heart-outline';
           } else if (route.name === 'Ne zbritje') {
             iconName = focused ? 'pricetag' : 'pricetag-outline';
+          } else if (route.name === 'Konfigurimi') {
+            // NEW: Add icon for the Settings tab
+            iconName = focused ? 'settings' : 'settings-outline';
           }
           else {
             // Add a fallback icon to handle any other cases and satisfy TypeScript.
@@ -85,42 +93,36 @@ function MainTabs() {
         initialParams={{ onSale: true }}
         options={{ headerShown: false }}
       />
-      {/* Add more tabs here */}
+      {/* --- NEW: Add the Settings screen to the tab navigator --- */}
+      <Tab.Screen
+        name="Konfigurimi"
+        component={SettingsScreen}
+        options={{ headerShown: false }}
+      />
     </Tab.Navigator>
   );
 }
 
-
-
+function DrawerNavigator() {
+  return (
+    <Drawer.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerTitle: 'Zbritje',
+      }}
+    >
+      <Drawer.Screen name="Home" component={MainTabs} options={{ title: 'Fillimi' }} />
+      {/* --- UPDATED: This now navigates to the Konfigurimi tab within MainTabs --- */}
+      <Drawer.Screen
+        name="Konfigurimi"
+        component={MainTabs} // Point to the Tab Navigator
+        // Set the initial screen within the Tab Navigator to be 'Konfigurimi'
+        initialParams={{ screen: 'Konfigurimi' }}
+      />
+    </Drawer.Navigator>
+  );
+}
 
 export default function AppNavigator() {
-  return (
-    <NavigationContainer>
-      <Drawer.Navigator>
-        <Drawer.Screen name="Main" component={MainTabs} 
-        
-            options={{
-            //headerTitle: 'Meniven',
-           // headerShown: true, // Show or hide header
-            header: () => <CustomHeaderComponent title="Meniven.com" />
-            // You can also use header: () => <CustomHeaderComponent />
-          }}
-        
-        />
-
-        <Drawer.Screen name="Favorites" component={FavoritesScreen} 
-
-                    options={{
-            //headerTitle: 'Meniven',
-           // headerShown: true, // Show or hide header
-            header: () => <CustomHeaderComponent title="Meniven.com" />
-            // You can also use header: () => <CustomHeaderComponent />
-          }}
-        />
-
-
-        {/* Add more drawer items here */}
-      </Drawer.Navigator>
-    </NavigationContainer>
-  );
+  return <DrawerNavigator />;
 }

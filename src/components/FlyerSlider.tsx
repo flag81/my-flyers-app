@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, View, TouchableOpacity, StyleSheet, Dimensions, Text, FlatList } from 'react-native';
+import { Modal, View, TouchableOpacity, StyleSheet, Dimensions, Text, FlatList, ImageBackground } from 'react-native';
 import ImageViewing from 'react-native-image-viewing';
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 };
 
 const FlyerSlider: React.FC<Props> = ({ flyerBook, baseUrl, isFlyerModalOpen, closeFlyerModal, isLoading }) => {
-  const { width } = Dimensions.get('window');
+  const { width, height } = Dimensions.get('window');
   const images = flyerBook.map((item) => ({
     uri: item.image_url.startsWith('http') ? item.image_url : `${baseUrl}/${item.image_url}`,
   }));
@@ -36,7 +36,7 @@ const FlyerSlider: React.FC<Props> = ({ flyerBook, baseUrl, isFlyerModalOpen, cl
         </TouchableOpacity>
 
         {isLoading ? (
-          <Text style={{ color: '#fff', fontSize: 18 }}>Loading…</Text>
+          <Text style={{ color: '#fff', fontSize: 18 }}>Duke ngarkuar...</Text>
         ) : (
           <FlatList
             horizontal
@@ -44,30 +44,32 @@ const FlyerSlider: React.FC<Props> = ({ flyerBook, baseUrl, isFlyerModalOpen, cl
             data={images}
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item, index }) => (
+              // The slide now has a defined height, allowing the content to fill it
               <TouchableOpacity
                 activeOpacity={0.9}
-                style={[styles.slide, { width: width }]}
+                style={[styles.slide, { width, height }]}
                 onPress={() => openZoomViewer(index)}
               >
-                <View style={styles.imageWrapper}>
-                  <ImageViewing
-                    images={[{ uri: item.uri }]}
-                    imageIndex={0}
-                    visible={false} // Important → here we only use Image background, zoom done below
-                    onRequestClose={() => setZoomViewerVisible(false)}
-                  />
-                  <Text style={styles.imageText}>Tap to Zoom</Text>
-                  <ImageViewing
-                    images={images}
-                    imageIndex={currentIndex}
-                    visible={zoomViewerVisible}
-                    onRequestClose={() => setZoomViewerVisible(false)}
-                  />
-                </View>
+                {/* Use ImageBackground for better performance and to overlay text */}
+                <ImageBackground
+                  source={{ uri: item.uri }}
+                  style={styles.image}
+                  resizeMode="contain"
+                >
+                  <Text style={styles.imageText}>Prek për zmadhim</Text>
+                </ImageBackground>
               </TouchableOpacity>
             )}
           />
         )}
+        
+        {/* The zoom viewer is now outside the list, rendered only once */}
+        <ImageViewing
+          images={images}
+          imageIndex={currentIndex}
+          visible={zoomViewerVisible}
+          onRequestClose={() => setZoomViewerVisible(false)}
+        />
       </View>
     </Modal>
   );
@@ -75,23 +77,43 @@ const FlyerSlider: React.FC<Props> = ({ flyerBook, baseUrl, isFlyerModalOpen, cl
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'center', alignItems: 'center'
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    // FIX: Removed justifyContent and alignItems to allow FlatList to fill the screen
   },
   slide: {
-    justifyContent: 'center', alignItems: 'center'
+    // This container now correctly centers its content (the image)
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  imageWrapper: {
-    flex: 1, justifyContent: 'center', alignItems: 'center'
+  image: {
+    // The image will fill the available space of the slide
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end', // Position text at the bottom
+    alignItems: 'center', // Center text horizontally
   },
   imageText: {
-    color: '#fff', fontSize: 16, marginTop: 10
+    color: '#fff',
+    fontSize: 16,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    overflow: 'hidden', // Ensures background respects borderRadius
+    marginBottom: 60, // Position above the bottom edge
   },
   closeButton: {
-    position: 'absolute', top: 40, right: 20, zIndex: 10
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 10,
   },
   closeButtonContent: {
-    backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 20, padding: 8
-  }
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderRadius: 20,
+    padding: 8,
+  },
 });
 
 export default FlyerSlider;

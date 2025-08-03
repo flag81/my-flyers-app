@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, FlatList, Image, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProducts, getStores } from '../services/api';
+import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { getProducts, getStores, getProductsByIds } from '../services/api';
 import ProductModal from '../components/ProductModal';
 import FlyerSlider from '../components/FlyerSlider';
 import RegistrationModal from '../components/RegistrationModal';
@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Define the type for the navigator's screen list
 type RootTabParamList = {
-  Home: {  isFavorites?: boolean; onSale?: boolean};
+  Home: {  isFavorites?: boolean; onSale?: boolean; notificationProductIds?: number[] };
   Favorites: { isFavorites?: boolean };
   OnSale: { isFavorites?: boolean };
 };
@@ -26,7 +26,7 @@ type Props = BottomTabScreenProps<RootTabParamList, 'Home' | 'Favorites' | 'OnSa
 
 const HomeScreen: React.FC<Props> = ({ route }: Props) => {
 
-    const { isFavorites: routeIsFavorites, onSale: routeOnSale } = route.params || {};
+    const { isFavorites: routeIsFavorites, onSale: routeOnSale, notificationProductIds: routeProductIds } = route.params || {};
   // 
   // Auth hook
   const {
@@ -44,6 +44,16 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
   const [isFavorite, setIsFavorite] = useState(routeIsFavorites || false);
   const [onSale, setOnSale] = useState(routeOnSale || false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [notificationProducts, setNotificationProducts] = useState<any[]>([]);
+
+  // --- NEW: Query for fetching products from a notification ---
+  const { data: fetchedNotificationProducts, isLoading: isLoadingNotificationProducts } = useQuery({
+    queryKey: ['notificationProducts', routeProductIds],
+    queryFn: () => getProductsByIds(routeProductIds!),
+    enabled: !!routeProductIds && routeProductIds.length > 0, // Only run if IDs are present
+  });
+
+  // State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState('');
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -55,7 +65,11 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
   useEffect(() => {
     setIsFavorite(route.params?.isFavorites || false);
     setOnSale(route.params?.onSale || false);
-  }, [route.params]);
+    // Set notification products when they are fetched
+    if (fetchedNotificationProducts) {
+      setNotificationProducts(fetchedNotificationProducts);
+    }
+  }, [route.params, fetchedNotificationProducts]);
 
 
   const queryClient = useQueryClient();
@@ -171,14 +185,24 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
 
   // Products
   const allProducts = data?.pages.flatMap((p) => p.products) ?? [];
-  const onSaleProducts = allProducts.filter((p) => p.productOnSale);
-  const notOnSaleProducts = allProducts.filter((p) => !p.productOnSale);
+
+  // Create a set of IDs from the notification products for efficient lookup.
+  const notificationProductIdsSet = new Set(notificationProducts.map(p => p.productId));
+
+  // Filter the main product list to exclude any products that are already shown in the notification section.
+  const filteredAllProducts = allProducts.filter(p => !notificationProductIdsSet.has(p.productId));
+
+  // Now, create the on-sale and not-on-sale lists from the filtered products.
+  const onSaleProducts = filteredAllProducts.filter((p) => p.productOnSale);
+  const notOnSaleProducts = filteredAllProducts.filter((p) => !p.productOnSale);
 
 
     const combinedProducts = [
-  ...onSaleProducts.map((p) => ({ ...p, section: 'On Sale' })),
-  ...notOnSaleProducts.map((p) => ({ ...p, section: 'Expired' }))
-];
+      // Prepend notification products if they exist
+      ...notificationProducts.map((p) => ({ ...p, section: 'Nga Njoftimi' })),
+      ...onSaleProducts.map((p) => ({ ...p, section: 'Në Ofertë' })),
+      ...notOnSaleProducts.map((p) => ({ ...p, section: 'Skaduar' }))
+    ];
 
 
 
@@ -265,7 +289,7 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
       <View>
         {showSectionTitle && (
           <Text style={styles.sectionTitle}>
-            {item.section === 'On Sale' ? '' : 'Skaduar'}
+            {item.section}
           </Text>
         )}
         <ProductCard
@@ -370,7 +394,7 @@ const styles = StyleSheet.create({
     padding: 6, backgroundColor: '#f0f0f0', borderRadius: 12, marginRight: 8, marginBottom: 8
   },
   sectionTitle: {
-    fontSize: 18, fontWeight: 'bold', marginVertical: 8
+    fontSize: 18, fontWeight: 'bold', marginVertical: 8, paddingHorizontal: 8, backgroundColor: '#f0f0f0', color: '#333'
   },
   productCard: {
     

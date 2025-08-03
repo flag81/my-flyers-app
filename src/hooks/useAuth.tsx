@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
-
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import apiService, { initializeAnonymousSession } from '../services/apiService'; // Import apiService
 
 export const useAuth = () => {
   const [userId, setUserId] = useState<number | null>(null);
@@ -11,12 +9,11 @@ export const useAuth = () => {
 
   const checkUserSession = useCallback(async () => {
     try {
-      console.log('[DEBUG] checkUserSession called');
-      const response = await fetch(`${API_URL}/check-session`, {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      console.log('[DEBUG] /check-session response:', data);
+      console.log('[Auth] Checking user session...');
+      // Use the centralized apiService for all calls
+      const response = await apiService.get('/check-session');
+      const data = response.data;
+      console.log('[Auth] /check-session response:', data);
 
       if (data.isLoggedIn) {
         setUserId(data.userId);
@@ -24,39 +21,14 @@ export const useAuth = () => {
         setEmail(data.email || '');
         setIsLoggedIn(true);
       } else {
-        setUserId(null);
-        setIsRegistered(false);
-        setEmail('');
+        // If not logged in, ensure we have an anonymous token
+        console.log('[Auth] No active session, ensuring anonymous token exists...');
+        await initializeAnonymousSession();
         setIsLoggedIn(false);
-        console.log('[DEBUG] No user ID found, calling /initialize...');
-        initializeAnonymousSession();
       }
     } catch (error) {
-      console.error('Error checking session:', error);
-      setUserId(null);
-      setIsRegistered(false);
-      setEmail('');
+      console.error('[Auth] Error checking session:', error);
       setIsLoggedIn(false);
-    }
-  }, []);
-
-  const initializeAnonymousSession = useCallback(async () => {
-    try {
-      const response = await fetch(`${API_URL}/initialize`, {
-        method: 'GET',
-        credentials: 'include'
-      });
-      const data = await response.json();
-      if (response.ok && data.userId) {
-        console.log('[DEBUG] Anonymous session initialized, userId:', data.userId);
-        setUserId(data.userId);
-        setIsRegistered(false);
-        setIsLoggedIn(false);
-      } else {
-        console.error('[ERROR] Failed to initialize anonymous session:', data.message);
-      }
-    } catch (error) {
-      console.error('Error initializing anonymous session:', error);
     }
   }, []);
 

@@ -25,8 +25,15 @@ export const getProducts = async ({ pageParam = 1, queryKey }: any) => {
   };
 };
 
+export const getProductsByIds = async (productIds: number[]) => {
+  if (!productIds || productIds.length === 0) {
+    return [];
+  }
+  const res = await apiService.get(`/products-by-ids?ids=${productIds.join(',')}`);
+  return res.data;
+};
+
 export const getStores = async () => {
-  // Use the pre-configured axios instance
   const res = await apiService.get('/getStores');
   return res.data;
 };

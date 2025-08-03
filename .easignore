@@ -1,0 +1,20 @@
+# .easignore
+# This file works like .gitignore and will exclude files from the build.
+
+# Node modules
+node_modules/
+
+# Expo
+.expo/
+dist/
+
+# Server code (if it's inside the app folder)
+zbritje-server/
+
+# Other
+*.jks
+*.p12
+*.keystore
+npm-debug.log
+yarn-debug.log
+yarn-error.log

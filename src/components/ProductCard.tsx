@@ -129,6 +129,8 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
         </TouchableOpacity>
       </View>
 
+
+
       {/* 🔍 Fullscreen Zoom Viewer */}
       <ImageViewing
         images={[{ uri: imageUrl }]}
@@ -136,13 +138,43 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
         visible={zoomVisible}
         onRequestClose={() => setZoomVisible(false)}
         backgroundColor="black"
-          FooterComponent={() => (
-            <View  style={{ padding: 10, backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <Text style={{   color: 'white',
-                textAlign: 'center',
-                fontSize: 14}}>{item.product_description}</Text>
-            </View>
-  )}
+        FooterComponent={() => (
+          <View style={footerStyles.container}>
+            {/* Product Description */}
+            <Text style={footerStyles.description}>{item.product_description}</Text>
+
+            {/* Price */}
+            <Text style={footerStyles.price}>
+              {item.old_price > 0 ? `${item.old_price}€ → ` : ''}
+              <Text style={footerStyles.salePrice}>{item.new_price > 0 ? `${item.new_price}€ ` : ''}</Text>
+            </Text>
+
+
+
+
+            {/* Store and Sale Date */}
+            <Text style={footerStyles.details}>
+              Dyqani: {item.storeName || 'N/A'}
+            </Text>
+            {item.sale_end_date && (
+              <Text style={footerStyles.details}>
+                Oferta deri: {new Date(item.sale_end_date).toLocaleDateString('en-GB', {
+                  day: '2-digit', month: '2-digit', year: 'numeric'
+                })}
+              </Text>
+            )}
+
+            {/* Favorite Button */}
+            <TouchableOpacity
+              onPress={() => handleToggleFavorite(item.productId, item.isFavorite)}
+              style={footerStyles.favoriteButton}
+            >
+              <Text style={[footerStyles.favoriteText, { color: item.isFavorite ? 'gold' : '#ccc' }]}>
+                {item.isFavorite ? '★ Largo nga Favoritet' : '☆ Shto Favorit'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       />
 
 
@@ -150,6 +182,7 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
   );
 };
 
+// Styles for the main card
 const styles = StyleSheet.create({
   productCard: {
     width: '100%',
@@ -182,5 +215,51 @@ const styles = StyleSheet.create({
     marginTop: 4
   }
 });
+
+// Styles for the ImageViewing Footer
+const footerStyles = StyleSheet.create({
+  container: {
+    padding: 20,
+    paddingBottom: 40, // Extra padding for home bar on iOS/Android
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  description: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  price: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  salePrice: {
+    color: '#4CAF50', // A light green
+    fontWeight: 'bold',
+  },
+  details: {
+    color: '#D0D0D0', // A light gray
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  favoriteButton: {
+    marginTop: 12,
+    alignSelf: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  favoriteText: {
+    fontSize: 14,
+  }
+});
+
 
 export default React.memo(ProductCard);

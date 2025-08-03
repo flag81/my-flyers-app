@@ -4,6 +4,10 @@
 node_modules/
 
 # Expo
+/android
+/ios
+
+# Expo
 .expo/
 dist/
 web-build/
@@ -35,3 +39,8 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+google-services.json
+# add firebase-credentials.json if you use Firebase
+firebase-credentials.json
+.env
+persistent/
