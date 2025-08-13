@@ -4,16 +4,11 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
-import SettingsScreen from '../screens/SettingsScreen'; // Import the new screen
+import SettingsScreen from '../screens/SettingsScreen';
 import CustomHeaderComponent from '../components/CustomHeaderComponent';
-import { Ionicons } from '@expo/vector-icons'; // Import from @expo/vector-icons
+import { Ionicons } from '@expo/vector-icons';
 
-
-
-
-
-// Define the parameters that each screen in the tab navigator can receive.
-// 'undefined' means the route takes no parameters.
+// Define the type for the tab navigator's screen list
 export type TabParamList = {
   Fillimi: undefined;
   Favoritet: { isFavorites: boolean };
@@ -28,7 +23,6 @@ export type DrawerParamList = {
   Home: undefined;
   Konfigurimi: undefined;
 };
-
 
 // Strongly type the navigator creator functions with the param lists.
 const Drawer = createDrawerNavigator<DrawerParamList>();
@@ -106,9 +100,9 @@ function MainTabs() {
 function DrawerNavigator() {
   return (
     <Drawer.Navigator
+      // Use the `header` option in `screenOptions` to apply the custom header to all screens.
       screenOptions={{
-        headerShown: true,
-        headerTitle: 'Zbritje',
+        header: (props:any) => <CustomHeaderComponent title={props.options.title || 'Zbritje'} />,
       }}
     >
       <Drawer.Screen name="Home" component={MainTabs} options={{ title: 'Fillimi' }} />

@@ -6,6 +6,8 @@ import { Platform } from 'react-native';
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 
+console.log('API URL env:', process.env.EXPO_PUBLIC_API_URL);
+
 const TOKEN_KEY = 'userToken';
 
 console.log('API URL:', API_URL);

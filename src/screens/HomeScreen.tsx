@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, FlatList, Image, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity, FlatList,Platform, Image, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { getProducts, getStores, getProductsByIds } from '../services/api';
 import ProductModal from '../components/ProductModal';
@@ -110,8 +110,8 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
   // Active filters effect
   useEffect(() => {
     const filters: string[] = [];
-    if (isFavorite) filters.push('Favorites');
-    if (onSale) filters.push('On Sale');
+    if (isFavorite) filters.push('Favoritet');
+    if (onSale) filters.push('Ne zbritje');
     if (selectedStore && selectedStoreName) filters.push(`Dyqani: ${selectedStoreName}`);
     if (searchKeyword.length > 2) filters.push(`Fjalë kyçe: "${searchKeyword}"`);
     setActiveFilters(filters);
@@ -186,6 +186,8 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
   // Products
   const allProducts = data?.pages.flatMap((p) => p.products) ?? [];
 
+  console.log('All Products:', allProducts);
+
   // Create a set of IDs from the notification products for efficient lookup.
   const notificationProductIdsSet = new Set(notificationProducts.map(p => p.productId));
 
@@ -231,8 +233,10 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
 
         <TouchableOpacity  style={styles.storeButton}
         
-        onPress={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })}>
-          <Text style={{ color: 'black' }}>Kerko</Text>
+          onPress={() => queryClient.invalidateQueries({ queryKey: productsQueryKey })}>
+
+     <Ionicons name="search" size={26} color="black" />
+
         </TouchableOpacity>
       </View>
 
@@ -262,8 +266,17 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
             }}
             >
 
-          
-            <Text>{item.storeName}</Text>
+
+
+            {item.logoUrl && (
+              <Image
+                source={{ uri: item.logoUrl }}
+                style={{ width: 32, height: 32, marginTop: 4, marginBottom: 4, borderRadius: 16, resizeMode: 'contain' }}
+              />
+            )}
+
+
+            <Text style={{ fontSize: 8, color: '#333' }}>{item.storeName}</Text>
           </TouchableOpacity>
         )}
         style={styles.storeList}
@@ -334,13 +347,25 @@ const HomeScreen: React.FC<Props> = ({ route }: Props) => {
   );
 };
 
+
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
     paddingTop: 34, // Add top padding for safe area
     paddingLeft: 16, // Add left padding if needed
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+    // add horizontal margin
+    ...Platform.select({
+      ios: {
+        marginHorizontal: 10, // This margin will only apply on iOS
+      },
+      android: {
+        marginHorizontal: 0, // No horizontal margin on Android
+      }
+    }),
   },
     searchContainer: {
     flex: 1,
@@ -354,6 +379,7 @@ const styles = StyleSheet.create({
     clearButton: {
     paddingRight: 8,
   },
+
   title: {
     fontSize: 24, fontWeight: 'bold', marginBottom: 16
   },
@@ -361,28 +387,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', marginBottom: 8
   },
   input: {
-    flex: 1, borderWidth: 1, borderColor: '#ccc', padding: 8, marginRight: 8, borderRadius: 4
+    flex: 1, borderWidth: 0, borderColor: '#ccc', padding: 8, marginRight: 8, borderRadius: 4
   },
   storeList: {
     marginVertical: 8,
-    height: 48,
-    maxHeight: 48,
-    minHeight: 48,
+    height: 60, // Increased height to comfortably fit the buttons
   },
   storeButton: {
+
      paddingHorizontal: 12,
-  paddingVertical: 8, // ✅ ensures vertical space for text
-
-  marginHorizontal: 4,
-  borderRadius: 5,
-  justifyContent: 'center', // ✅ vertically center text
-  alignItems: 'center',
-    minHeight: 40 ,
-    maxHeight: 40,
-  // add border color 
-  borderWidth: 1,
-  borderColor: '#ccc',
-
+     paddingVertical: 4, // Adjusted padding for a better fit
+     marginHorizontal: 4,
+     borderRadius: 5,
+     justifyContent: 'center',
+     alignItems: 'center',
+     // REMOVED fixed minHeight and maxHeight to allow the button to fit its content
+     borderWidth: 0,
+     borderColor: '#ccc',
   },
   storeButtonSelected: {
     backgroundColor: '#cceeff'

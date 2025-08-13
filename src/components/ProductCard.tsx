@@ -9,6 +9,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import ImageViewing from 'react-native-image-viewing';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type Props = {
   item: any;
@@ -16,13 +17,6 @@ type Props = {
   handleToggleFavorite: (productId: number, productIsCurrentlyFavorite: boolean) => void;
 };
 
-// Map store logo filenames from the database to local assets
-const storeLogos: { [key: string]: any } = {
-  'spar.png': require('../../assets/spar.png'),
-  'vivafresh.jpeg': require('../../assets/vivafresh.jpeg'),
-  'interex.png': require('../../assets/interex.png'),
-  // Add other store logos here as needed
-};
 
 
 const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite }) => {
@@ -34,11 +28,7 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
   const [zoomVisible, setZoomVisible] = useState(false);
 
 
-
-  
-
-
- const cardWidth = Dimensions.get('window').width - 32;
+  const cardWidth = Dimensions.get('window').width - 32;
 
   const imageUrl = item.image_url.startsWith('http')
     ? item.image_url
@@ -100,33 +90,59 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
         </Text>
 
 
-        <Text style={{ fontSize: 12, color: '#666' }}>
-          Dyqani: {item.storeName || 'U'}
-        </Text>
 
-        {item.sale_end_date && (
-          <Text style={{ fontSize: 12, color: '#666' }}>
-            {/* Sale End Date in format DD/MM/YYYY */}
-            Oferta deri: {new Date(item.sale_end_date).toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric'
-            })}
+      
+        <View style={styles.detailsRow}>
 
-          </Text>
-        )}
+          
+          {console.log('ProductCard detailsRow:', item)}
+
+          <TouchableOpacity
+            onPress={() => handleToggleFavorite(item.productId, item.isFavorite)}
+            style={{ marginRight: 8 }}
+            accessibilityLabel={item.isFavorite ? 'Largo nga Favoritet' : 'Shto Favorit'}
+          >
+            <MaterialCommunityIcons
+              name={item.isFavorite ? 'star' : 'star-outline'}
+              size={26}
+              color={item.isFavorite ? 'red' : '#888'}
+            />
+          </TouchableOpacity>
+
+
+
+          {/* Conditionally render the logo or the store name */}
+          {item.logoUrl ? (
+            <Image source={{ uri: item.logoUrl }} style={styles.storeLogo} />
+          ) : (
+            <Text style={styles.detailsText}>
+              {item.storeName || 'N/A'}
+           
+            </Text>
+          )}
+
+
+            {item.sale_end_date && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <MaterialCommunityIcons name="calendar-clock" size={18} color="#666" />
+                <Text style={styles.detailsText}>
+                  *-{new Date(item.sale_end_date).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                  })}
+                </Text>
+              </View>
+            )}
+
+
+   
+        </View>
 
         {/* ⭐ Favorite Button */}
 
 
-        <TouchableOpacity
-          onPress={() => handleToggleFavorite(item.productId, item.isFavorite)}
-          style={styles.favoriteButton}
-        >
-          <Text style={{ color: item.isFavorite ? 'gold' : 'gray' }}>
-            {item.isFavorite ? '★ Largo nga Favoritet' : '☆ Shto Favorit'}
-          </Text>
-        </TouchableOpacity>
+
       </View>
 
 
@@ -182,10 +198,11 @@ const ProductCard: React.FC<Props> = ({ item, openModal, handleToggleFavorite })
   );
 };
 
+
 // Styles for the main card
 const styles = StyleSheet.create({
   productCard: {
-    width: '100%',
+
     borderRadius: 8,
     overflow: 'hidden',
     borderWidth: 1,
@@ -203,16 +220,37 @@ const styles = StyleSheet.create({
     padding: 8
   },
   productDescription: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 4
+    marginBottom: 4,
+    // make content align to center
+    textAlign: 'center'
   },
   productPrice: {
-    fontSize: 14,
-    marginBottom: 6
+    fontSize: 16,
+    marginBottom: 6,
+    textAlign: 'center'
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    
+
+  },
+    storeLogo: {
+    width: 100,
+    height: 60,
+    resizeMode: 'contain'
+  },
+  detailsText: {
+    fontSize: 16,
+    color: '#666',
   },
   favoriteButton: {
-    marginTop: 4
+    marginTop: 4,
+    fontSize: 16
   }
 });
 
@@ -227,7 +265,7 @@ const footerStyles = StyleSheet.create({
   },
   description: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 8,
@@ -257,7 +295,7 @@ const footerStyles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   favoriteText: {
-    fontSize: 14,
+    fontSize: 16,
   }
 });
 
